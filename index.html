@@ -344,10 +344,12 @@
             .sidebar {
                 position: fixed;
                 top: 0;
+                bottom: 0;
                 left: -260px;
-                height: 100vh;
+                height: 100%;
                 z-index: 20;
                 transition: left 0.3s ease;
+                padding-bottom: env(safe-area-inset-bottom, 20px);
             }
 
             .sidebar.active {
