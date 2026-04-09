@@ -305,17 +305,70 @@
             color: white;
         }
 
+        .mobile-header {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 15px;
+            background-color: var(--sidebar-bg);
+            border-bottom: 1px solid var(--border-color);
+            color: white;
+            font-size: 16px;
+        }
+
+        .menu-btn, .mobile-new-chat-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+
         @media (max-width: 768px) {
+            .mobile-header {
+                display: flex;
+            }
+
             .sidebar {
-                display: none;
+                position: fixed;
+                top: 0;
+                left: -260px;
+                height: 100vh;
+                z-index: 20;
+                transition: left 0.3s ease;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .sidebar-overlay.active {
+                display: block;
             }
 
             .message-row {
-                padding: 15px;
+                padding: 15px 10px;
             }
 
             .input-container {
                 padding: 10px;
+            }
+            
+            .message-content {
+                gap: 15px;
+                font-size: 15px;
             }
         }
     </style>
@@ -323,7 +376,9 @@
 
 <body>
 
-    <div class="sidebar">
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="sidebar" id="sidebar">
         <button class="new-chat-btn" id="newChatBtn">
             <i class="fas fa-plus"></i> New chat
         </button>
@@ -335,6 +390,16 @@
     </div>
 
     <div class="main-content">
+        <div class="mobile-header">
+            <button class="menu-btn" id="menuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <span class="mobile-title">AI Assistant</span>
+            <button class="mobile-new-chat-btn" id="mobileNewChatBtn">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+
         <div class="chat-container" id="chatContainer">
             <!-- Messages container -->
         </div>
@@ -376,7 +441,11 @@
             settingsModal: document.getElementById('settingsModal'),
             closeModal: document.getElementById('closeModal'),
             saveSettings: document.getElementById('saveSettings'),
-            apiKeyInput: document.getElementById('apiKeyInput')
+            apiKeyInput: document.getElementById('apiKeyInput'),
+            sidebar: document.getElementById('sidebar'),
+            sidebarOverlay: document.getElementById('sidebarOverlay'),
+            menuBtn: document.getElementById('menuBtn'),
+            mobileNewChatBtn: document.getElementById('mobileNewChatBtn')
         };
 
         let GEMINI_API_KEY = localStorage.getItem('GEMINI_API_KEY') || '';
@@ -530,7 +599,24 @@
             }
         });
 
-        DOM.newChatBtn.addEventListener('click', startNewChat);
+        DOM.newChatBtn.addEventListener('click', () => {
+            startNewChat();
+            if (window.innerWidth <= 768) toggleSidebar();
+        });
+
+        DOM.mobileNewChatBtn.addEventListener('click', startNewChat);
+
+        function toggleSidebar() {
+            DOM.sidebar.classList.toggle('active');
+            DOM.sidebarOverlay.classList.toggle('active');
+        }
+
+        DOM.menuBtn.addEventListener('click', toggleSidebar);
+        DOM.sidebarOverlay.addEventListener('click', toggleSidebar);
+
+        DOM.settingsBtn.addEventListener('click', () => {
+            if (window.innerWidth <= 768) toggleSidebar();
+        });
 
         // Initialization
         if (initGemini()) {
