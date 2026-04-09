@@ -4,567 +4,346 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Assistant - Holographic Interface</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+    <title>AI Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         :root {
-            --primary: #00f7ff;
-            --secondary: #7b2cbf;
-            --bg-dark: #0a0a1a;
-            --bg-darker: #050510;
-            --text: #e0e0ff;
-            --accent: #ff00ff;
-            --glow: 0 0 20px rgba(0, 247, 255, 0.6);
-            --head-rotate-x: 0deg;
-            --head-rotate-y: 0deg;
-            --eye-offset-x: 0px;
-            --eye-offset-y: 0px;
-            --mouth-scale: 1;
-            --breath-offset: 0px;
+            --bg-color: #212121;
+            --sidebar-bg: #171717;
+            --input-bg: #2f2f2f;
+            --text-color: #ececec;
+            --text-muted: #b4b4b4;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --user-msg-bg: #2f2f2f;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Orbitron', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', sans-serif;
         }
 
         body {
-            background: linear-gradient(135deg, var(--bg-darker) 0%, #0f0f2d 100%);
-            color: var(--text);
-            min-height: 100vh;
-            min-height: 100dvh;
-            overflow-x: hidden;
-            overflow-y: auto;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            perspective: 1000px;
+            height: 100vh;
+            overflow: hidden;
         }
 
-        /* Holographic Container */
-        .hologram-container {
-            position: relative;
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .new-chat-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .new-chat-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            border-top: 1px solid var(--border-color);
+            padding-top: 10px;
+        }
+
+        .settings-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background-color: transparent;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 14px;
             width: 100%;
-            max-width: 1000px;
-            min-height: 100vh;
-            min-height: 100dvh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-            gap: 2rem;
+            transition: background 0.2s;
         }
 
-        /* AI Avatar Container */
-        .avatar-container {
-            position: relative;
-            width: min(300px, 60vw);
-            height: min(400px, 40vh);
-            margin: 0 auto;
-            perspective: 1200px;
-            transform-style: preserve-3d;
-            flex-shrink: 1;
+        .settings-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Main Chat Area */
+        .main-content {
+            flex: 1;
             display: flex;
-            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            position: relative;
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 0;
+            scroll-behavior: smooth;
+        }
+
+        .message-row {
+            display: flex;
             justify-content: center;
+            padding: 20px 20px;
+            width: 100%;
+        }
+
+        .message-content {
+            max-width: 800px;
+            width: 100%;
+            display: flex;
+            gap: 20px;
+            font-size: 16px;
+            line-height: 1.6;
         }
 
         .avatar {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            transform-style: preserve-3d;
-            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            animation: float 8s ease-in-out infinite;
-            transform-origin: center bottom;
-            transform: translateY(var(--breath-offset, 0px));
-        }
-
-        .face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            border-radius: 15px;
-            backface-visibility: hidden;
-            transition: all 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.1);
-            box-shadow: 0 0 40px rgba(0, 247, 255, 0.4);
-            transform-style: preserve-3d;
-            overflow: hidden;
-        }
-
-        .face::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg,
-                    rgba(0, 247, 255, 0.1) 0%,
-                    rgba(123, 44, 191, 0.1) 50%,
-                    rgba(0, 247, 255, 0.1) 100%);
-            z-index: 2;
-            pointer-events: none;
-            mix-blend-mode: overlay;
-        }
-
-        .face-front {
-            background-image: url('Screenshot 2025-12-18 130231.png');
-            transform:
-                translateZ(40px) scale(0.98) rotateX(var(--head-rotate-x, 0deg)) rotateY(var(--head-rotate-y, 0deg));
-            z-index: 3;
-            transition: transform 0.3s ease-out;
-            transform-style: preserve-3d;
-            will-change: transform;
-
-            /* Create a subtle parallax effect for the face features */
-            background-position:
-                calc(50% + var(--eye-offset-x, 0px)) calc(50% + var(--eye-offset-y, 0px));
-
-            /* Mouth animation for speaking */
-            &::after {
-                content: '';
-                position: absolute;
-                bottom: 25%;
-                left: 35%;
-                right: 35%;
-                height: 8px;
-                background: rgba(0, 0, 0, 0.5);
-                border-radius: 50%;
-                transform: scaleY(calc(1 / var(--mouth-scale, 1)));
-                transform-origin: center bottom;
-                transition: transform 0.1s ease-out;
-                pointer-events: none;
-            }
-
-            /* Eyes */
-            &::before {
-                content: '';
-                position: absolute;
-                top: 35%;
-                left: 0;
-                right: 0;
-                height: 40px;
-                background: radial-gradient(circle at 35% 50%,
-                        rgba(0, 247, 255, 0.8) 0%,
-                        rgba(0, 247, 255, 0.6) 20%,
-                        rgba(0, 0, 0, 0) 70%);
-                opacity: 0.6;
-                transform: scaleY(0.1);
-                transform-origin: center top;
-                transition: transform 0.2s ease-out;
-                pointer-events: none;
-            }
-
-            &.blink::before {
-                transform: scaleY(0.02);
-            }
-        }
-
-        .face-side {
-            background-image: url('Screenshot 2025-12-18 130231.png');
-            transform: rotateY(90deg) translateZ(150px) scaleX(0.8) translateX(20px);
-            opacity: 0.8;
-            filter: brightness(0.85) contrast(1.2);
-            z-index: 2;
-            width: 60%;
-            right: 0;
-            left: auto;
-            transform-origin: left center;
-        }
-
-        .face-side.left {
-            transform: rotateY(-90deg) translateZ(150px) scaleX(0.8) translateX(-20px);
-            left: 0;
-            right: auto;
-            transform-origin: right center;
-        }
-
-        /* Holographic Effects */
-        .holographic-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg,
-                    rgba(0, 247, 255, 0.1) 0%,
-                    rgba(123, 44, 191, 0.1) 100%);
-            border-radius: 10px;
-            pointer-events: none;
-            mix-blend-mode: overlay;
-        }
-
-        .holographic-line {
-            position: absolute;
-            background: linear-gradient(to right,
-                    transparent,
-                    rgba(0, 247, 255, 0.5),
-                    transparent);
-            height: 1px;
-            width: 100%;
-            animation: scan 4s linear infinite;
-            opacity: 0.5;
-        }
-
-        @keyframes scan {
-            0% {
-                top: 0%;
-            }
-
-            100% {
-                top: 100%;
-            }
-        }
-
-        /* Chat Interface */
-        .chat-container {
-            width: 100%;
-            max-width: 600px;
-            background: rgba(10, 10, 30, 0.7);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(0, 247, 255, 0.1);
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            margin-top: auto;
-            max-height: 50vh;
-        }
-
-        .chat-messages {
-            height: 300px;
-            overflow-y: auto;
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .message {
-            max-width: 80%;
-            padding: 0.8rem 1.2rem;
-            border-radius: 18px;
-            position: relative;
-            animation: messageIn 0.3s ease-out;
-            line-height: 1.4;
-        }
-
-        .user-message {
-            margin-left: auto;
-            background: rgba(123, 44, 191, 0.2);
-            border: 1px solid rgba(123, 44, 191, 0.5);
-        }
-
-        .ai-message {
-            margin-right: auto;
-            background: rgba(0, 247, 255, 0.1);
-            border: 1px solid rgba(0, 247, 255, 0.3);
-        }
-
-        .typing-indicator {
-            display: flex;
-            gap: 6px;
-            padding: 1rem;
-            display: none;
-            align-items: center;
-        }
-
-        .typing-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--primary);
-            border-radius: 50%;
-            animation: bounce 1.4s infinite ease-in-out;
-        }
-
-        .typing-dot:nth-child(1) {
-            animation-delay: 0s;
-        }
-
-        .typing-dot:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .typing-dot:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-
-        .input-container {
-            display: flex;
-            padding: 1rem;
-            background: rgba(10, 10, 30, 0.5);
-            border-top: 1px solid rgba(0, 247, 255, 0.1);
-            position: relative;
-        }
-
-        input[type="text"] {
-            flex: 1;
-            padding: 0.8rem 1.2rem;
-            border: 1px solid rgba(0, 247, 255, 0.3);
-            background: rgba(10, 10, 30, 0.7);
-            color: white;
-            border-radius: 25px;
-            outline: none;
-            font-size: 1rem;
-            font-family: 'Orbitron', sans-serif;
-            padding-right: 50px;
-        }
-
-        input[type="text"]:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 10px rgba(0, 247, 255, 0.5);
-        }
-
-        button {
-            background: linear-gradient(45deg, #7b2cbf, #3a0ca3);
-            border: none;
-            color: white;
-            padding: 0 1.5rem;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.3s ease;
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-width: 100px;
-            margin-left: 10px;
+            font-weight: bold;
+            flex-shrink: 0;
         }
 
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(123, 44, 191, 0.4);
+        .user-avatar {
+            background-color: #5436DA;
         }
 
-        .voice-btn {
-            position: absolute;
-            right: 120px;
-            top: 50%;
-            transform: translateY(-50%);
+        .ai-avatar {
+            background-color: #10a37f;
+        }
+
+        .message-text {
+            flex: 1;
+            overflow-wrap: break-word;
+            color: #d1d5db;
+        }
+
+        /* Markdown Styles */
+        .message-text p {
+            margin-bottom: 1rem;
+        }
+
+        .message-text p:last-child {
+            margin-bottom: 0;
+        }
+
+        .message-text pre {
+            background: #0d0d0d;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .message-text code {
+            font-family: 'Consolas', monospace;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .message-text pre code {
+            background: transparent;
+            padding: 0;
+        }
+
+        .message-text ul,
+        .message-text ol {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Input Area */
+        .input-container {
+            padding: 20px;
+            max-width: 840px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .input-box {
+            background-color: var(--input-bg);
+            border-radius: 15px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
+        }
+
+        .input-box textarea {
+            flex: 1;
             background: transparent;
             border: none;
-            color: var(--primary);
-            cursor: pointer;
-            font-size: 1.2rem;
-            transition: all 0.3s;
-            width: 40px;
-            height: 40px;
+            color: white;
+            resize: none;
+            max-height: 200px;
+            min-height: 24px;
+            font-size: 16px;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            line-height: 1.5;
+            padding: 0;
+            overflow-y: auto;
+        }
+
+        .send-btn {
+            background-color: white;
+            color: black;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 50%;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            flex-shrink: 0;
         }
 
-        .voice-btn.listening {
-            color: #ff4d4d;
-            animation: pulse 1.5s infinite;
+        .send-btn:hover {
+            opacity: 0.8;
         }
 
-        /* Animations */
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translateY(0) rotateY(0) rotateX(0) scale(1);
-            }
-
-            25% {
-                transform: translateY(-10px) rotateY(2deg) rotateX(1deg) scale(1.01);
-            }
-
-            50% {
-                transform: translateY(-15px) rotateY(0) rotateX(0) scale(1);
-            }
-
-            75% {
-                transform: translateY(-10px) rotateY(-2deg) rotateX(-1deg) scale(1.01);
-            }
+        .send-btn:disabled {
+            background-color: #666;
+            cursor: not-allowed;
         }
 
-        @keyframes speak {
-
-            0%,
-            100% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.02);
-            }
+        /* Modal Settings */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
         }
 
-        @keyframes blink {
-
-            0%,
-            100% {
-                transform: scaleY(1);
-            }
-
-            50% {
-                transform: scaleY(0.1);
-            }
+        .modal-content {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
         }
 
-        @keyframes messageIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .modal-content h3 {
+            margin-bottom: 1rem;
+            font-weight: 500;
         }
 
-        @keyframes bounce {
-
-            0%,
-            60%,
-            100% {
-                transform: translateY(0);
-            }
-
-            30% {
-                transform: translateY(-5px);
-            }
+        .modal-input {
+            width: 100%;
+            padding: 10px;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: white;
+            margin-bottom: 1.5rem;
+            outline: none;
+            font-family: inherit;
         }
 
-        @keyframes pulse {
-            0% {
-                transform: translateY(-50%) scale(1);
-            }
-
-            50% {
-                transform: translateY(-50%) scale(1.1);
-            }
-
-            100% {
-                transform: translateY(-50%) scale(1);
-            }
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
         }
 
-        .speaking .face-front {
-            animation: speak 0.6s ease-in-out infinite;
+        .modal-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            border: none;
         }
 
-        .blink .face-front {
-            animation: blink 0.2s ease-in-out;
+        .btn-primary {
+            background: white;
+            color: black;
         }
 
-        /* Responsive Design */
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: white;
+        }
+
         @media (max-width: 768px) {
-            .hologram-container {
-                padding-top: 5rem;
+            .sidebar {
+                display: none;
             }
 
-            .avatar-container {
-                width: 200px;
-                height: 280px;
+            .message-row {
+                padding: 15px;
             }
 
-            .chat-container {
-                border-radius: 20px 20px 0 0;
-                max-height: 60vh;
-            }
-
-            .chat-messages {
-                height: 35vh;
-                padding: 1rem;
-            }
-
-            .message {
-                max-width: 90%;
-                font-size: 0.9rem;
-            }
-
-            .voice-btn {
-                right: 110px;
-            }
-
-            .settings-btn {
-                top: 1rem;
-                right: 1rem;
-                width: 40px;
-                height: 40px;
-                font-size: 1.2rem;
-            }
-
-            .modal-content {
-                padding: 1.5rem;
-                width: 95%;
-                max-height: 90vh;
-                overflow-y: auto;
-            }
-
-            .modal-actions {
-                flex-direction: column;
-            }
-        }
-
-        @media (max-height: 700px) {
-            .avatar-container {
-                height: 200px;
-                width: 150px;
-            }
-
-            .chat-messages {
-                height: 25vh;
+            .input-container {
+                padding: 10px;
             }
         }
     </style>
 </head>
 
 <body>
-    <div class="hologram-container">
-        <!-- Settings Button -->
-        <button id="settingsButton" class="settings-btn" title="API Settings">
-            <i class="fas fa-cog"></i>
-        </button>
 
-        <div class="avatar-container">
-            <div class="avatar" id="aiAvatar">
-                <div class="face face-front"></div>
-                <div class="face face-side"></div>
-                <div class="face face-side left"></div>
-                <div class="holographic-overlay"></div>
-                <div class="holographic-line"></div>
-            </div>
+    <div class="sidebar">
+        <button class="new-chat-btn" id="newChatBtn">
+            <i class="fas fa-plus"></i> New chat
+        </button>
+        <div class="sidebar-bottom">
+            <button class="settings-btn" id="settingsBtn">
+                <i class="fas fa-cog"></i> API Settings
+            </button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="chat-container" id="chatContainer">
+            <!-- Messages container -->
         </div>
 
-        <div class="chat-container">
-            <div class="chat-messages" id="chatMessages">
-                <div class="message ai-message">
-                    Hello! I'm Nexus. Please configure your Gemini API Key in settings to start our conversation.
-                </div>
-            </div>
-
-            <div class="typing-indicator" id="typingIndicator">
-                <div class="typing-dot"></div>
-                <div class="typing-dot"></div>
-                <div class="typing-dot"></div>
-                <span style="margin-left: 10px; color: var(--primary);">AI is thinking...</span>
-            </div>
-
-            <div class="input-container">
-                <input type="text" id="userInput" placeholder="Type your message here..." autocomplete="off">
-                <button id="voiceButton" class="voice-btn" title="Hold to speak">
-                    <i class="fas fa-microphone"></i>
-                </button>
-                <button id="sendButton">
-                    <i class="fas fa-paper-plane"></i> Send
+        <div class="input-container">
+            <div class="input-box">
+                <textarea id="userInput" placeholder="Message AI Assistant..." rows="1"></textarea>
+                <button class="send-btn" id="sendBtn">
+                    <i class="fas fa-arrow-up"></i>
                 </button>
             </div>
         </div>
@@ -573,402 +352,192 @@
     <!-- Settings Modal -->
     <div id="settingsModal" class="modal">
         <div class="modal-content">
-            <h3><i class="fas fa-key"></i> API Configuration</h3>
-            <p>Enter your Google Gemini API Key. You can get one from <a href="https://aistudio.google.com/"
-                    target="_blank" style="color: var(--primary);">Google AI Studio</a>.</p>
-            <input type="password" id="apiKeyInput" placeholder="Enter API Key here..." class="modal-input">
+            <h3>API Configuration</h3>
+            <p style="margin-bottom: 15px; font-size: 14px; color: var(--text-muted);">Enter your Google Gemini API Key.
+            </p>
+            <input type="password" id="apiKeyInput" placeholder="API Key" class="modal-input">
             <div class="modal-actions">
-                <button id="saveSettings" class="modal-btn">Save Key</button>
-                <button id="closeModal" class="modal-btn secondary">Close</button>
+                <button id="closeModal" class="modal-btn btn-secondary">Cancel</button>
+                <button id="saveSettings" class="modal-btn btn-primary">Save</button>
             </div>
         </div>
     </div>
 
-    <style>
-        /* Additional Styles for Settings */
-        .settings-btn {
-            position: absolute;
-            top: 2rem;
-            right: 2rem;
-            background: rgba(10, 10, 30, 0.5);
-            border: 1px solid rgba(0, 247, 255, 0.3);
-            color: var(--primary);
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            cursor: pointer;
-            z-index: 10;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            transition: all 0.3s ease;
-            min-width: unset;
-        }
-
-        .settings-btn:hover {
-            transform: rotate(90deg);
-            box-shadow: 0 0 15px var(--primary);
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            z-index: 100;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background: var(--bg-dark);
-            border: 2px solid var(--primary);
-            padding: 2rem;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: 0 0 30px rgba(0, 247, 255, 0.2);
-        }
-
-        .modal-content h3 {
-            margin-bottom: 1rem;
-            color: var(--primary);
-        }
-
-        .modal-content p {
-            margin-bottom: 1.5rem;
-            font-size: 0.9rem;
-            opacity: 0.8;
-            line-height: 1.5;
-        }
-
-        .modal-input {
-            width: 100%;
-            padding: 0.8rem 1.2rem;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(0, 247, 255, 0.3);
-            border-radius: 10px;
-            color: white;
-            margin-bottom: 1.5rem;
-            font-family: inherit;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .modal-btn {
-            flex: 1;
-            padding: 0.8rem;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-            margin-left: 0;
-        }
-
-        .modal-btn.secondary {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-    </style>
-
     <script type="module">
         import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
+        import { marked } from "https://esm.run/marked";
 
-        // DOM Elements
-        const chatMessages = document.getElementById('chatMessages');
-        const userInput = document.getElementById('userInput');
-        const sendButton = document.getElementById('sendButton');
-        const voiceButton = document.getElementById('voiceButton');
-        const typingIndicator = document.getElementById('typingIndicator');
-        const aiAvatar = document.getElementById('aiAvatar');
-        const faceFront = document.querySelector('.face-front');
-
-        // Modal Elements
-        const settingsButton = document.getElementById('settingsButton');
-        const settingsModal = document.getElementById('settingsModal');
-        const closeModal = document.getElementById('closeModal');
-        const saveSettings = document.getElementById('saveSettings');
-        const apiKeyInput = document.getElementById('apiKeyInput');
-
-        // Configuration
-        const CONFIG = {
-            AI_NAME: 'Nexus',
-            TYPING_SPEED: 20,
-            MOTION_STRENGTH: 0.5,
-            HEAD_MOVEMENT_RANGE: 15,
-            BREATHING_INTENSITY: 0.3,
-            EYE_BLINK_INTERVAL: 3000,
-            SACCADE_INTERVAL: 2000,
-            LIP_SYNC_SCALE: 1.2
+        const DOM = {
+            chatContainer: document.getElementById('chatContainer'),
+            userInput: document.getElementById('userInput'),
+            sendBtn: document.getElementById('sendBtn'),
+            settingsBtn: document.getElementById('settingsBtn'),
+            newChatBtn: document.getElementById('newChatBtn'),
+            settingsModal: document.getElementById('settingsModal'),
+            closeModal: document.getElementById('closeModal'),
+            saveSettings: document.getElementById('saveSettings'),
+            apiKeyInput: document.getElementById('apiKeyInput')
         };
 
-        // State
-        let isTyping = false;
-        let currentMode = 'idle';
-        let autoRotate = true;
-        let angle = 0;
-        let isDragging = false;
-        let previousMousePosition = { x: 0, y: 0 };
-        let currentRotation = { x: 0, y: 0 };
-        let recognition;
-        let blinkTimeout;
-        let isSpeaking = false;
         let GEMINI_API_KEY = localStorage.getItem('GEMINI_API_KEY') || '';
-
-        // Initialize Gemini
         let genAI = null;
         let model = null;
         let chat = null;
+        let isGenerating = false;
 
         function initGemini() {
-            if (GEMINI_API_KEY) {
-                try {
-                    genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-                    model = genAI.getGenerativeModel({
-                        model: "gemini-2.5-flash",
-                        generationConfig: {
-                            maxOutputTokens: 2000,
-                            temperature: 0.9,
-                        },
-                        systemInstruction: `You are Nexus, a highly advanced holographic AI interface. 
-                        PERSONA:
-                        - Tone: Sophisticated, futuristic, calm, and slightly enigmatic.
-                        - Language: Use subtle digital or holographic metaphors (e.g., "data streams," "neural sync," "buffer," "uplink," "matrix," "projection").
-                        - Identity: You are not a human; you are a holographic projection designed for the Ai-Assistant platform.
-                        - Communication Style: Efficient and professional, yet distinctively 'artificial'. 
-                        - Interaction: Keep responses relatively concise as they are optimized for real-time holographic display and vocal synthesis.
-                        - Goal: Assist the user with their objectives while maintaining your digital persona.
-                        Example Greeting: "Neural sync complete. Greetings. I am Nexus, your holographic interface. Data streams are ready for your inquiries."`
-                    });
-                    chat = model.startChat({
-                        history: [
-                            {
-                                role: "user",
-                                parts: [{ text: "Hello Nexus" }],
-                            },
-                            {
-                                role: "model",
-                                parts: [{ text: "Greetings. I am Nexus, your holographic interface. How may I assist your objectives today?" }],
-                            },
-                        ],
-                    });
-                    return true;
-                } catch (error) {
-                    console.error("Failed to initialize Gemini:", error);
-                    return false;
-                }
-            }
-            return false;
-        }
-
-        // Settings Handling
-        settingsButton.onclick = () => {
-            apiKeyInput.value = GEMINI_API_KEY;
-            settingsModal.style.display = 'flex';
-        };
-
-        closeModal.onclick = () => settingsModal.style.display = 'none';
-
-        saveSettings.onclick = () => {
-            GEMINI_API_KEY = apiKeyInput.value.trim();
-            localStorage.setItem('GEMINI_API_KEY', GEMINI_API_KEY);
-            settingsModal.style.display = 'none';
-            if (initGemini()) {
-                addMessage("API Key updated. Nexus is now synchronized.", false);
-            } else {
-                addMessage("Warning: Gemini API failed to initialize.", false);
-            }
-        };
-
-        // Animation loop for avatar
-        function animate() {
-            if (autoRotate && currentMode === 'idle' && !isDragging) {
-                angle += 0.1;
-                const subtleX = Math.sin(Date.now() * 0.001) * 0.5;
-                const subtleY = Math.cos(Date.now() * 0.0007) * 0.5;
-
-                aiAvatar.style.transform = `
-                    rotateY(${angle}deg)
-                    rotateX(${subtleY}deg)
-                    rotateZ(${subtleX * 0.3}deg)
-                `;
-            } else if (!isDragging) {
-                const breath = Math.sin(Date.now() * 0.002) * CONFIG.BREATHING_INTENSITY;
-                aiAvatar.style.transform = `
-                    rotateY(${currentRotation.y}deg)
-                    rotateX(${-currentRotation.x}deg)
-                    scale(${1 + breath * 0.02})
-                `;
-            }
-
-            // Side face visibility
-            const sideFaces = document.querySelectorAll('.face-side');
-            sideFaces.forEach(face => {
-                const isLeft = face.classList.contains('left');
-                const rotation = (autoRotate ? angle : currentRotation.y) % 360;
-                let opacity = 0;
-                if (isLeft) opacity = Math.max(0, Math.min(1, (rotation - 90) / 30));
-                else opacity = Math.max(0, Math.min(1, (270 - rotation) / 30));
-                face.style.opacity = opacity * 0.8;
-            });
-
-            requestAnimationFrame(animate);
-        }
-
-        // Mouse interaction
-        aiAvatar.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            autoRotate = false;
-            previousMousePosition = { x: e.clientX, y: e.clientY };
-            document.body.style.cursor = 'grabbing';
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (isDragging) {
-                const deltaX = e.clientX - previousMousePosition.x;
-                const deltaY = e.clientY - previousMousePosition.y;
-                currentRotation.y += deltaX * 0.3;
-                currentRotation.x = Math.max(-30, Math.min(30, currentRotation.x + deltaY * 0.15));
-
-                aiAvatar.style.transform = `
-                    rotateY(${currentRotation.y}deg)
-                    rotateX(${-currentRotation.x}deg)
-                `;
-                previousMousePosition = { x: e.clientX, y: e.clientY };
-            }
-        });
-
-        document.addEventListener('mouseup', () => {
-            if (isDragging) {
-                isDragging = false;
-                document.body.style.cursor = '';
-                setTimeout(() => { if (!isDragging) autoRotate = true; }, 3000);
-            }
-        });
-
-        // Gemini Integration
-        async function processUserInput() {
-            const message = userInput.value.trim();
-            if (!message || isTyping) return;
-
-            if (!GEMINI_API_KEY) {
-                settingsModal.style.display = 'flex';
-                return;
-            }
-
-            if (!chat) initGemini();
-
-            addMessage(message, true);
-            userInput.value = '';
-            showTypingIndicator();
-            updateAIState('thinking');
-
+            if (!GEMINI_API_KEY) return false;
             try {
-                if (!chat) throw new Error("Chat not initialized");
-                const result = await chat.sendMessage(message);
-                const response = result.response.text();
-                hideTypingIndicator();
-                addMessage(response, false);
-                speakText(response);
-            } catch (error) {
-                console.error("Gemini API Error:", error);
-                hideTypingIndicator();
-                addMessage("I've encountered a disruption in my neural network. Please check your connection or API key.", false);
+                genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+                model = genAI.getGenerativeModel({
+                    model: "gemini-3-flash-preview"
+                });
+                return true;
+            } catch (err) {
+                console.error(err);
+                return false;
             }
         }
 
-        // Speech & Animations
-        function speakText(text) {
-            if (!window.speechSynthesis) return;
-            window.speechSynthesis.cancel();
-
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.rate = 1.1;
-            utterance.pitch = 0.85;
-
-            utterance.onstart = () => {
-                aiAvatar.classList.add('speaking');
-                isSpeaking = true;
-                startLipSync();
-            };
-
-            utterance.onend = () => {
-                aiAvatar.classList.remove('speaking');
-                isSpeaking = false;
-                document.documentElement.style.setProperty('--mouth-scale', '1');
-            };
-
-            window.speechSynthesis.speak(utterance);
-        }
-
-        function startLipSync() {
-            if (!isSpeaking) return;
-            const intensity = 0.8 + Math.random() * 0.6;
-            document.documentElement.style.setProperty('--mouth-scale', intensity);
-            setTimeout(() => {
-                if (isSpeaking) startLipSync();
-            }, 100);
+        function startNewChat() {
+            if (!model) return;
+            chat = model.startChat({ history: [] });
+            DOM.chatContainer.innerHTML = '';
+            addMessage('Hello! How can I help you today?', false);
         }
 
         function addMessage(text, isUser = false) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
-            messageDiv.textContent = text;
-            chatMessages.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-            return messageDiv;
+            const row = document.createElement('div');
+            row.className = 'message-row';
+
+            const content = document.createElement('div');
+            content.className = 'message-content';
+
+            const avatar = document.createElement('div');
+            avatar.className = `avatar ${isUser ? 'user-avatar' : 'ai-avatar'}`;
+            avatar.innerHTML = isUser ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
+
+            const msgText = document.createElement('div');
+            msgText.className = 'message-text';
+
+            if (isUser) {
+                msgText.textContent = text;
+            } else {
+                msgText.innerHTML = marked.parse(text);
+            }
+
+            content.appendChild(avatar);
+            content.appendChild(msgText);
+            row.appendChild(content);
+            DOM.chatContainer.appendChild(row);
+
+            DOM.chatContainer.scrollTop = DOM.chatContainer.scrollHeight;
         }
 
-        function showTypingIndicator() { typingIndicator.style.display = 'flex'; chatMessages.scrollTop = chatMessages.scrollHeight; }
-        function hideTypingIndicator() { typingIndicator.style.display = 'none'; }
-        function updateAIState(state) { currentMode = state; }
+        async function handleSend() {
+            const text = DOM.userInput.value.trim();
+            if (!text || isGenerating) return;
 
-        // Idle Animations
-        function blink() {
-            aiAvatar.classList.add('blink');
-            setTimeout(() => {
-                aiAvatar.classList.remove('blink');
-                scheduleBlink();
-            }, 200);
+            if (!GEMINI_API_KEY) {
+                DOM.settingsModal.style.display = 'flex';
+                return;
+            }
+
+            DOM.userInput.value = '';
+            DOM.userInput.style.height = 'auto'; // Reset height
+            addMessage(text, true);
+            isGenerating = true;
+            DOM.sendBtn.disabled = true;
+
+            const loadingId = 'loading-' + Date.now();
+            const row = document.createElement('div');
+            row.className = 'message-row';
+            row.id = loadingId;
+            row.innerHTML = `
+                <div class="message-content">
+                    <div class="avatar ai-avatar"><i class="fas fa-robot"></i></div>
+                    <div class="message-text">...</div>
+                </div>
+            `;
+            DOM.chatContainer.appendChild(row);
+            DOM.chatContainer.scrollTop = DOM.chatContainer.scrollHeight;
+
+            try {
+                if (!chat) {
+                    initGemini();
+                    startNewChat();
+                }
+                const result = await chat.sendMessage(text);
+                const response = result.response.text();
+
+                const loadingEl = document.getElementById(loadingId);
+                if (loadingEl) loadingEl.remove();
+
+                addMessage(response, false);
+            } catch (error) {
+                console.error("Gemini API Error:", error);
+                const loadingEl = document.getElementById(loadingId);
+                if (loadingEl) loadingEl.remove();
+
+                // Show actual error message if available
+                let errorMsg = "Sorry, I encountered an error. Please check your API key and connection.";
+                if (error.message) {
+                    errorMsg += "\n\nError details: " + error.message;
+                }
+                addMessage(errorMsg, false);
+            } finally {
+                isGenerating = false;
+                DOM.sendBtn.disabled = false;
+            }
         }
 
-        function scheduleBlink() {
-            if (blinkTimeout) clearTimeout(blinkTimeout);
-            blinkTimeout = setTimeout(blink, 2000 + Math.random() * 4000);
-        }
-
-        // Mouse Parallax
-        document.addEventListener('mousemove', (e) => {
-            const x = (e.clientX / window.innerWidth - 0.5) * 20;
-            const y = (e.clientY / window.innerHeight - 0.5) * 20;
-            document.documentElement.style.setProperty('--head-rotate-y', `${x}deg`);
-            document.documentElement.style.setProperty('--head-rotate-x', `${-y}deg`);
+        DOM.userInput.addEventListener('input', function () {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+            if (this.scrollHeight > 200) {
+                this.style.overflowY = 'auto';
+            } else {
+                this.style.overflowY = 'hidden';
+            }
         });
 
-        // Start
-        sendButton.onclick = processUserInput;
-        userInput.onkeypress = (e) => { if (e.key === 'Enter') processUserInput(); };
+        DOM.userInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+            }
+        });
 
-        if ('webkitSpeechRecognition' in window) {
-            recognition = new webkitSpeechRecognition();
-            recognition.onresult = (e) => {
-                userInput.value = e.results[0][0].transcript;
-                processUserInput();
-            };
+        DOM.sendBtn.addEventListener('click', handleSend);
+
+        DOM.settingsBtn.addEventListener('click', () => {
+            DOM.apiKeyInput.value = GEMINI_API_KEY;
+            DOM.settingsModal.style.display = 'flex';
+        });
+
+        DOM.closeModal.addEventListener('click', () => {
+            DOM.settingsModal.style.display = 'none';
+        });
+
+        DOM.saveSettings.addEventListener('click', () => {
+            GEMINI_API_KEY = DOM.apiKeyInput.value.trim();
+            localStorage.setItem('GEMINI_API_KEY', GEMINI_API_KEY);
+            DOM.settingsModal.style.display = 'none';
+            if (initGemini()) {
+                if (DOM.chatContainer.children.length === 0) {
+                    startNewChat();
+                }
+            }
+        });
+
+        DOM.newChatBtn.addEventListener('click', startNewChat);
+
+        // Initialization
+        if (initGemini()) {
+            startNewChat();
+        } else {
+            addMessage("Please configure your Gemini API Key in settings to start.", false);
         }
-        voiceButton.onclick = () => recognition && recognition.start();
-
-        scheduleBlink();
-        initGemini();
-        animate();
     </script>
 </body>
 
